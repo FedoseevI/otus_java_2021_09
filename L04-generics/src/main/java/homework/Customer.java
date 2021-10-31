@@ -1,7 +1,5 @@
 package homework;
 
-import java.util.*;
-
 public class Customer implements Comparable {
     private long id;
     private String name;
@@ -50,32 +48,18 @@ public class Customer implements Comparable {
 
         Customer customer = (Customer) o;
 
-        if (this.id != customer.id) return false;
-        if (this.scores != customer.scores) return false;
-        return name != null ? name.equals(customer.name) : customer.name == null;
+        return this.id == customer.id;
     }
 
     @Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + (this.name != null ? this.name.hashCode() : 0);
-        result = 31 * result + (int) (this.scores ^ (this.scores >>> 32));
         return result;
     }
 
     @Override
     public int compareTo(Object obj) {
-        Customer customer=(Customer) obj;
+        Customer customer = (Customer) obj;
         return (this.getScores() < customer.getScores() ? -1 : (this.getScores() == customer.getScores() ? 0 : 1));
     }
-
-    /*@Override
-    public int compare(Object obj1, Object obj2) {
-        // сортировка TreeMap на основании Scores
-        Customer customer1=(Customer) obj1;
-        Customer customer2=(Customer) obj2;
-        if (customer1.getScores() > customer2.getScores()) return 1;
-        else if (customer1.getScores() < customer2.getScores()) return -1;
-        else return 0;
-    }*/
 }

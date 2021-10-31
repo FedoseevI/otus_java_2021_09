@@ -1,10 +1,8 @@
 package homework;
 
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.AbstractMap;
 
 public class CustomerService {
 
@@ -14,24 +12,19 @@ public class CustomerService {
 
     public Map.Entry<Customer, String> getSmallest() {
         //Возможно, чтобы реализовать этот метод, потребуется посмотреть как Map.Entry сделан в jdk
-        Customer minCustomer=new Customer(customerTree.firstKey().getId(),customerTree.firstKey().getName(),customerTree.firstKey().getScores());
-        return new java.util.AbstractMap.SimpleEntry<Customer, String>(minCustomer, customerTree.get(customerTree.firstKey()));
+        return getEntryCopy(customerTree.firstEntry());
+    }
+
+    private Map.Entry<Customer, String> getEntryCopy(Map.Entry<Customer, String> customerMapEntry) {
+        if (customerMapEntry == null) {
+            return null;
+        }
+        // возвращаем копию элемента
+        return new AbstractMap.SimpleImmutableEntry<>(new Customer(customerMapEntry.getKey().getId(), customerMapEntry.getKey().getName(), customerMapEntry.getKey().getScores()), customerMapEntry.getValue());
     }
 
     public Map.Entry<Customer, String> getNext(Customer customer) {
-        TreeMap<Customer, String> rebalancedTree=new TreeMap<Customer, String>();
-        rebalancedTree.putAll(customerTree);
-        Map.Entry<Customer, String> nextEntry;
-        if(!rebalancedTree.containsKey(customer)){
-            rebalancedTree.put(customer,"unexistingString");
-            nextEntry=rebalancedTree.higherEntry(customer);
-            rebalancedTree.remove(customer,"unexistingString");
-        }else
-        {
-            nextEntry=rebalancedTree.higherEntry(customer);
-        }
-        customerTree=rebalancedTree;
-        return nextEntry;
+        return getEntryCopy(customerTree.higherEntry(customer));
     }
 
     public void add(Object customer, String data) {
