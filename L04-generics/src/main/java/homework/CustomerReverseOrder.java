@@ -1,20 +1,21 @@
 package homework;
 
-import java.util.LinkedList;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 public class CustomerReverseOrder {
 
     //todo: 2. надо реализовать методы этого класса
     //надо подобрать подходящую структуру данных, тогда решение будет в "две строчки"
-    private static final LinkedList<Customer> customerList = new LinkedList<Customer>();
+    private final Deque<Customer> stackCustomer = new ArrayDeque<Customer>();
 
     public void add(Customer customer) {
         // добавляем элемент в конец
-        customerList.push(customer);
+        stackCustomer.push(customer);
     }
 
     public Customer take() {
         // берем последний элемент
-        return customerList.pop();
+        return stackCustomer.pop();
     }
 }

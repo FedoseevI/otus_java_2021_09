@@ -1,6 +1,6 @@
 package homework;
 
-public class Customer implements Comparable {
+public class Customer {
     private long id;
     private String name;
     private long scores;
@@ -55,11 +55,5 @@ public class Customer implements Comparable {
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
         return result;
-    }
-
-    @Override
-    public int compareTo(Object obj) {
-        Customer customer = (Customer) obj;
-        return (this.getScores() < customer.getScores() ? -1 : (this.getScores() == customer.getScores() ? 0 : 1));
     }
 }
