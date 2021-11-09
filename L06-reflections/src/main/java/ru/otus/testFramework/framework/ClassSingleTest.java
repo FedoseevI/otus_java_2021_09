@@ -20,9 +20,14 @@ public class ClassSingleTest<T> {
 
     public boolean runTest() {
         T classInstance = genClassInstance();
-        Optional.ofNullable(before)
-                .ifPresent(method -> execBefore(classInstance));
-        boolean testExecutionResult = execTest(classInstance);
+        boolean beforeResult = true;
+        if (before != null) {
+            beforeResult = execBefore(classInstance);
+        }
+        boolean testExecutionResult = false;
+        if (beforeResult) {
+            testExecutionResult = execTest(classInstance);
+        }
         Optional.ofNullable(after)
                 .ifPresent(method -> execAfter(classInstance));
         return testExecutionResult;
@@ -36,12 +41,14 @@ public class ClassSingleTest<T> {
         }
     }
 
-    public void execBefore(T instance) {
+    public boolean execBefore(T instance) {
         try {
             before.invoke(instance);
+            return true;
         } catch (Exception e) {
             System.err.printf("%s BEFORE execution failed%n", before.getName());
             e.printStackTrace();
+            return false;
         }
     }
 
