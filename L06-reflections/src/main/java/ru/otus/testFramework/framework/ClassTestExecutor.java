@@ -10,7 +10,7 @@ public class ClassTestExecutor {
     public static <T> void testClass(Class<T> testClass) {
 
         ClassScanner classScanner = new ClassScanner();
-        ClassTestGenerator testGenerator = new ClassTestGenerator<T>(classScanner);
+        ClassTestGenerator testGenerator = new ClassTestGenerator<>(classScanner);
 
         List<ClassSingleTest<T>> tests = testGenerator.generateTests(testClass);
 
@@ -18,17 +18,14 @@ public class ClassTestExecutor {
         System.out.printf(message, testClass.getName());
 
         int cntSuccessTests = 0;
-        int cntFailureTests = 0;
 
-        for (ClassSingleTest<?> test : tests) {
+        for (ClassSingleTest<T> test : tests) {
             boolean testResullt = test.runTest();
             if (testResullt) {
                 cntSuccessTests = cntSuccessTests + 1;
-            } else {
-                cntFailureTests = cntFailureTests + 1;
             }
         }
         message = "%ntest result statistics:%n   test count: %d%n   successful count: %d%n   failure count: %d%n";
-        System.out.printf(message, tests.size(), cntSuccessTests, cntFailureTests);
+        System.out.printf(message, tests.size(), cntSuccessTests, tests.size()-cntSuccessTests);
     }
 }

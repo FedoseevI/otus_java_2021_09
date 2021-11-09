@@ -40,7 +40,8 @@ public class ClassSingleTest<T> {
         try {
             before.invoke(instance);
         } catch (Exception e) {
-            throw new RuntimeException(before.getName() + " BEFORE execution failed", e);
+            System.err.printf("%s BEFORE execution failed%n", before.getName());
+            e.printStackTrace();
         }
     }
 
@@ -59,7 +60,8 @@ public class ClassSingleTest<T> {
         try {
             after.invoke(instance);
         } catch (Exception e) {
-            throw new RuntimeException(after.getName() + " AFTER execution failed", e);
+            System.err.printf("%s AFTER execution failed%n", after.getName());
+            e.printStackTrace();
         }
     }
 }

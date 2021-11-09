@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 public class ClassScanner {
 
     public <T> ClassInfo<T> scanClass(Class<T> clazz) {
-        ClassInfo<T> classInfo = new ClassInfo<T>();
+        ClassInfo<T> classInfo = new ClassInfo<>();
         Constructor<T> constructor = getConstructor(clazz);
         classInfo.setConstructor(constructor);
         Method[] classMethods = clazz.getMethods();
