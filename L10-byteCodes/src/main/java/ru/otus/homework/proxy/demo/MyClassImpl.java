@@ -34,4 +34,10 @@ public class MyClassImpl implements MyClassInterface {
         System.out.println("without @Log");
     }
 
+    @Log
+    @Override
+    public void function6() {
+        System.out.println("with @Log");
+    }
+
 }

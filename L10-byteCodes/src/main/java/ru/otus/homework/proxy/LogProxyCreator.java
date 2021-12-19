@@ -2,7 +2,6 @@ package ru.otus.homework.proxy;
 
 import ru.otus.homework.proxy.annotation.Log;
 
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -45,7 +44,7 @@ public class LogProxyCreator {
                     .findFirst();
 
             if (targetMethod.isPresent()) {
-                System.out.printf("LogProxy logging: invoke '%s' args%s%n", method.getName(), Arrays.toString(args));
+                System.out.printf("LogProxy logging: invoke '%s' args%s%n", method.getName(), Arrays.toString(args) == "null" ? "[WITHOUT args]" : Arrays.toString(args));
             }
 
             return method.invoke(target, args);

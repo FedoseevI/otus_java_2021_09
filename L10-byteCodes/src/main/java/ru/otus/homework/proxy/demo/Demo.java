@@ -11,5 +11,6 @@ public class Demo {
         proxy.function3(1, 2);
         proxy.function4(1);
         proxy.function5(2);
+        proxy.function6();
     }
 }
