@@ -2,6 +2,8 @@ rootProject.name = 'Homework_otusJava'
 include 'hw01-gradle'
 include 'L04-generics'
 include 'L06-reflections'
+include 'L08-gc:demo'
+include 'L08-gc:homework'
 
 include 'L10-byteCodes'
 
