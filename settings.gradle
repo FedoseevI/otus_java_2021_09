@@ -6,4 +6,5 @@ include 'L08-gc:demo'
 include 'L08-gc:homework'
 
 include 'L10-byteCodes'
+include 'L12-Solid-homework'
 
