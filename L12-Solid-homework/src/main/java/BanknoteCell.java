@@ -1,33 +1,31 @@
-import com.sun.jdi.ClassType;
-
 import java.util.LinkedList;
 
 public class BanknoteCell {
     private final LinkedList<Banknote> banknotes = new LinkedList<>();
-    private int nominal;
-    private long rest = 0;
+    private final Banknote.Nominal nominal;
+    private int rest = 0;
     private int count = 0;
 
-    public BanknoteCell(int nominal) {
+    public BanknoteCell(Banknote.Nominal nominal) {
         this.nominal = nominal;
     }
 
     public void pushBanknote(Banknote banknote) {
         banknotes.push(banknote);
         count++;
-        rest += banknote.getNominal();
-        System.out.println("в ячейку для номинала " + nominal + " добавлена купюра номиналом " + banknote.getNominal());
+        rest += banknote.getNominal().nominal();
+        System.out.println("в ячейку для номинала " + nominal.nominal() + " добавлена купюра номиналом " + banknote.getNominal().nominal());
     }
 
     public Banknote popBanknote() {
         Banknote result = banknotes.pop();
-        rest -= result.getNominal();
+        rest -= result.getNominal().nominal();
         count--;
-        System.out.println("из ячейки для номинала " + nominal + " выдана купюра номиналом " + result.getNominal());
+        System.out.println("из ячейки для номинала " + nominal.nominal() + " выдана купюра номиналом " + result.getNominal().nominal());
         return result;
     }
 
-    public long getRest() {
+    public int getRest() {
         return rest;
     }
 
@@ -35,7 +33,7 @@ public class BanknoteCell {
         return count;
     }
 
-    public int getNominal() {
+    public Banknote.Nominal getNominal() {
         return nominal;
     }
 
