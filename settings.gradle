@@ -7,3 +7,6 @@ include 'L08-gc:homework'
 
 include 'L10-byteCodes'
 
+include 'L15-structuralPatterns:demo'
+include 'L15-structuralPatterns:homework'
+
