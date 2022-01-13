@@ -1,14 +1,12 @@
 package ru.otus.model;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 //Допустим, этот класс библиотечный, его нельзя менять
 public final class Measurement {
     private final String name;
     private final double value;
 
-    public Measurement(@JsonProperty("name") String name, @JsonProperty("value") double value) {
+    public Measurement(String name, double value) {
         this.name = name;
         this.value = value;
     }

@@ -1,7 +1,8 @@
 package ru.otus.dataprocessor;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import ru.otus.model.Measurement;
 
@@ -16,6 +17,9 @@ public class ResourcesFileLoader implements Loader {
     public ResourcesFileLoader(String fileName) {
         this.fileName = fileName;
         this.mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Measurement.class, new MeasurementDeserializer());
+        mapper.registerModule(module);
     }
 
     @Override
@@ -28,4 +32,5 @@ public class ResourcesFileLoader implements Loader {
             throw new FileProcessException(e);
         }
     }
+
 }
