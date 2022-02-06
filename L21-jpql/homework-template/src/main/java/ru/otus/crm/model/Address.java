@@ -43,8 +43,7 @@ public class Address implements Cloneable {
 
     @Override
     public Address clone() {
-        var adressClone =  Address.builder().id(id).street(street).client(client).build();
-        return adressClone;
+        return Address.builder().id(id).street(street).client(client).build();
     }
 
     @Override

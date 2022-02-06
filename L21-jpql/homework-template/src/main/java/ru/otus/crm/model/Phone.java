@@ -41,8 +41,7 @@ public class Phone implements Cloneable {
 
     @Override
     public Phone clone() {
-        var phoneClone = Phone.builder().id(id).number(number).client(client).build();
-        return phoneClone;
+        return Phone.builder().id(id).number(number).client(client).build();
     }
 
     @Override
