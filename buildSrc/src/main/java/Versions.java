@@ -5,4 +5,6 @@ public interface Versions {
     String protobuf = "3.19.1";
 
     String testcontainers = "1.15.3";
+
+    String log4j = "2.12.1";
 }
