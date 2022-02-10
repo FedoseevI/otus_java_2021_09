@@ -24,6 +24,7 @@ allprojects {
         mavenCentral()
     }
 
+
     apply plugin: "io.spring.dependency-management"
     dependencyManagement {
         dependencies {
