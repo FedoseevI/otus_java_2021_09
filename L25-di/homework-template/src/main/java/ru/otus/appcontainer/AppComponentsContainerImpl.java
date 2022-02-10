@@ -1,21 +1,20 @@
 package ru.otus.appcontainer;
 
+import lombok.extern.log4j.Log4j2;
 import ru.otus.appcontainer.api.AppComponent;
 import ru.otus.appcontainer.api.AppComponentsContainer;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
-import ru.otus.config.AppConfig;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Log4j2
 public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     private final List<Object> appComponents = new ArrayList<>();
     private final Map<String, Object> appComponentsByName = new HashMap<>();
-    private final List<AppComponent> listAppComponentAnnotation = new ArrayList<>();
-    private final AppConfig appConfig = new AppConfig();
 
     public AppComponentsContainerImpl(Class<?> initialConfigClass) {
         processConfig(initialConfigClass);
@@ -24,20 +23,19 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     private void processConfig(Class<?> configClass) {
         checkConfigClass(configClass);
         // You code here...
-        Method[] classMethods = configClass.getMethods();
-        Map<String, Method> classMethodsMap = new HashMap<>();
+        var classMethods = configClass.getMethods();
+        var sortedMethodsList = Arrays.stream(classMethods).
+                filter(classMethod -> classMethod.isAnnotationPresent(AppComponent.class)).
+                collect(Collectors.toMap(classMethod -> classMethod.getAnnotation(AppComponent.class), classMethod -> classMethod)).entrySet().stream().sorted(Comparator.comparing(entry -> entry.getKey().order())).collect(Collectors.toList());
 
-        for (Method classMethod : classMethods) {
-            if (classMethod.isAnnotationPresent(AppComponent.class)) {
-                listAppComponentAnnotation.add(classMethod.getAnnotation(AppComponent.class));
-                classMethodsMap.put(classMethod.getAnnotation(AppComponent.class).name(), classMethod);
-            }
+        if (sortedMethodsList.stream().map(Map.Entry::getKey).count() != sortedMethodsList.stream().map(Map.Entry::getKey).map(e -> e.name()).collect(Collectors.toList()).stream().distinct().count()) {
+            log.info("found duplicate AppComponents", new RuntimeException());
+            throw new RuntimeException();
         }
 
-        listAppComponentAnnotation.sort(Comparator.comparing(AppComponent::order));
 
-        for (AppComponent appComponent : listAppComponentAnnotation) {
-            var methodToInvoke = classMethodsMap.get(appComponent.name());
+        sortedMethodsList.forEach(method -> {
+            var methodToInvoke = method.getValue();
             var parameters = methodToInvoke.getParameters();
             Object[] args = new Object[parameters.length];
             var i = 0;
@@ -47,13 +45,20 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
             }
             methodToInvoke.setAccessible(true);
             try {
-                Object object = methodToInvoke.invoke(appConfig, args);
+                Object configInstance = null;
+                try {
+                    configInstance = configClass.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    log.info("error creating configInstance" + e.getMessage(), new RuntimeException());
+                }
+                Object object = methodToInvoke.invoke(configInstance, args);
                 appComponents.add(object);
-                appComponentsByName.put(appComponent.name(), object);
+                appComponentsByName.put(method.getKey().name(), object);
             } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
                 throw new RuntimeException("error invoking method" + methodToInvoke.getName());
             }
-        }
+        });
+
     }
 
 

@@ -28,4 +28,6 @@ public interface Versions {
     String springDocOpenapiUi = "1.6.5";
 
     String jsr305 = "3.0.2";
+
+    String log4j = "2.12.1";
 }
