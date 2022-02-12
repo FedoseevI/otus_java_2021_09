@@ -1,20 +1,24 @@
 package ru.otus.crm.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import ru.otus.cachehw.HwListener;
 import ru.otus.cachehw.MyCache;
 import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.sessionmanager.TransactionRunner;
-import ru.otus.crm.model.Client;
 import ru.otus.crm.model.Manager;
+
 import java.util.List;
 import java.util.Optional;
 
-
+@Log4j2
 public class DbServiceManagerImpl implements DBServiceManager {
-    private static final Logger log = LoggerFactory.getLogger(DbServiceManagerImpl.class);
     private final MyCache<String, Manager> myCache = new MyCache<>();
+    private final HwListener<String, Manager> listener = new HwListener<String, Manager>() {
+        @Override
+        public void notify(String key, Manager value, String action) {
+            log.info("key:{}, value:{}, action: {}", key, value, action);
+        }
+    };
 
     private final DataTemplate<Manager> managerDataTemplate;
     private final TransactionRunner transactionRunner;
@@ -22,6 +26,8 @@ public class DbServiceManagerImpl implements DBServiceManager {
     public DbServiceManagerImpl(TransactionRunner transactionRunner, DataTemplate<Manager> managerDataTemplate) {
         this.transactionRunner = transactionRunner;
         this.managerDataTemplate = managerDataTemplate;
+        // добавляем listener
+        myCache.addListener(listener);
     }
 
     @Override
@@ -41,38 +47,17 @@ public class DbServiceManagerImpl implements DBServiceManager {
 
     @Override
     public Optional<Manager> getManager(long no) {
-        var listener = new HwListener<String, Manager>() {
-            @Override
-            public void notify(String key, Manager value, String action) {
-                if (action.equals(MyCache.actionGet)) {
-                    log.info("key:{}, value:{}, action: {}", key, value, action);
-                }
-            }
-        };
-        myCache.addListener(listener);
-
+        // пробуем получить данные из кэша
         Optional<Manager> managerFromCache = Optional.ofNullable(myCache.get(Long.toString(no)));
-        myCache.removeListener(listener);
-
         if (managerFromCache.isPresent()) {
             return managerFromCache;
         }
-
+        // если не удалось получить данные из кэша идем за данными в БД
         return transactionRunner.doInTransaction(connection -> {
             var managerOptional = managerDataTemplate.findById(connection, no);
             log.info("manager: {}", managerOptional);
             if (managerOptional.isPresent()) {
-                var listener_put = new HwListener<String, Manager>() {
-                    @Override
-                    public void notify(String key, Manager value, String action) {
-                        if (action.equals(MyCache.actionPut)) {
-                            log.info("key:{}, value:{}, action: {}", key, value, action);
-                        }
-                    }
-                };
-                myCache.addListener(listener_put);
                 myCache.put(Long.toString(no), managerOptional.get());
-                myCache.removeListener(listener_put);
             }
             return managerOptional;
         });
@@ -84,6 +69,6 @@ public class DbServiceManagerImpl implements DBServiceManager {
             var managerList = managerDataTemplate.findAll(connection);
             log.info("managerList:{}", managerList);
             return managerList;
-       });
+        });
     }
 }

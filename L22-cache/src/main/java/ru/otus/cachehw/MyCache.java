@@ -10,23 +10,12 @@ import java.util.WeakHashMap;
 @Log4j2
 public class MyCache<K, V> implements HwCache<K, V> {
 
-    private final Map<K,V> myCache = new WeakHashMap<>();
+    private static final String actionPut = "putting new value";
+    private static final String actionGet = "getting value";
+    private static final String actionRemove = "removing value";
+
+    private final Map<K, V> myCache = new WeakHashMap<>();
     private final List<HwListener<K, V>> listenerList = new ArrayList<>();
-
-    public static final String actionPut = "putting new value";
-    public static final String actionGet = "getting value";
-    public static final String actionRemove = "removing value";
-
-    private void notifyAll(K key, V value, String action) {
-        for (HwListener<K, V> listener : listenerList) {
-            try {
-                listener.notify(key, value, action);
-            }
-            catch (Exception ex) {
-                log.error("notifyAll runtime error", ex);
-            }
-        }
-    }
 
     @Override
     public void put(K key, V value) {
@@ -55,5 +44,15 @@ public class MyCache<K, V> implements HwCache<K, V> {
     @Override
     public void removeListener(HwListener<K, V> listener) {
         listenerList.remove(listener);
+    }
+
+    private void notifyAll(K key, V value, String action) {
+        for (HwListener<K, V> listener : listenerList) {
+            try {
+                listener.notify(key, value, action);
+            } catch (Exception ex) {
+                log.error("notifyAll runtime error", ex);
+            }
+        }
     }
 }
