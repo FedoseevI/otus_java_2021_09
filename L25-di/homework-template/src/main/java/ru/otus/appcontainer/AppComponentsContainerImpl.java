@@ -6,7 +6,6 @@ import ru.otus.appcontainer.api.AppComponentsContainer;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,41 +22,50 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     private void processConfig(Class<?> configClass) {
         checkConfigClass(configClass);
         // You code here...
-        var classMethods = configClass.getMethods();
-        var sortedMethodsList = Arrays.stream(classMethods).
-                filter(classMethod -> classMethod.isAnnotationPresent(AppComponent.class)).
-                collect(Collectors.toMap(classMethod -> classMethod.getAnnotation(AppComponent.class), classMethod -> classMethod)).entrySet().stream().sorted(Comparator.comparing(entry -> entry.getKey().order())).collect(Collectors.toList());
+        var methodsMap = Arrays.stream(configClass.getMethods())
+                .filter(classMethod -> classMethod.isAnnotationPresent(AppComponent.class))
+                .collect(Collectors.toMap(classMethod -> classMethod.getAnnotation(AppComponent.class), classMethod -> classMethod));
 
-        if (sortedMethodsList.stream().map(Map.Entry::getKey).count() != sortedMethodsList.stream().map(Map.Entry::getKey).map(e -> e.name()).collect(Collectors.toList()).stream().distinct().count()) {
+        if (methodsMap.keySet()
+                .size() !=
+                methodsMap.keySet().stream()
+                        .map(AppComponent::name)
+                        .collect(Collectors.toList())
+                        .stream()
+                        .distinct()
+                        .count()) {
             log.info("found duplicate AppComponents");
             throw new RuntimeException();
         }
 
-
-        sortedMethodsList.forEach(method -> {
-            var methodToInvoke = method.getValue();
-            var parameters = methodToInvoke.getParameters();
-            Object[] args = new Object[parameters.length];
-            for (int i = 0; i < parameters.length; i++) {
-                args[i] = getAppComponent(parameters[i].getType());
-            }
-            methodToInvoke.setAccessible(true);
-            try {
-                Object configInstance = null;
-                try {
-                    configInstance = configClass.getDeclaredConstructor().newInstance();
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-                    log.error("error creating configInstance" + e.getMessage());
-                    throw new RuntimeException();
-                }
-                Object object = methodToInvoke.invoke(configInstance, args);
-                appComponents.add(object);
-                appComponentsByName.put(method.getKey().name(), object);
-            } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-                log.error("error invoking method" + methodToInvoke.getName() + e.getMessage());
-                throw new RuntimeException();
-            }
-        });
+        methodsMap
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().order()))
+                .map(Map.Entry::getValue)
+                .forEach((methodToInvoke) -> {
+                    var parameters = methodToInvoke.getParameters();
+                    Object[] args = new Object[parameters.length];
+                    for (int i = 0; i < parameters.length; i++) {
+                        args[i] = getAppComponent(parameters[i].getType());
+                    }
+                    methodToInvoke.setAccessible(true);
+                    try {
+                        Object configInstance;
+                        try {
+                            configInstance = configClass.getDeclaredConstructor().newInstance();
+                        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+                            log.error("error creating configInstance" + e.getMessage());
+                            throw new RuntimeException();
+                        }
+                        Object object = methodToInvoke.invoke(configInstance, args);
+                        appComponents.add(object);
+                        appComponentsByName.put(methodToInvoke.getAnnotation(AppComponent.class).name(), object);
+                    } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+                        log.error("error invoking method" + methodToInvoke.getName() + e.getMessage());
+                        throw new RuntimeException();
+                    }
+                });
 
     }
 
