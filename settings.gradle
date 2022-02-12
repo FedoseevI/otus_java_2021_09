@@ -17,5 +17,8 @@ include 'L16-io:homework'
 include 'L18-jdbc:demo'
 include 'L18-jdbc:homework'
 
+include 'L21-jpql:class-demo'
+include 'L21-jpql:homework-template'
+
 include 'L25-di:class-demo'
 include 'L25-di:homework-template'
