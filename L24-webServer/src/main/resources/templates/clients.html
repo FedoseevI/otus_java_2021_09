@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Клиенты</title>
+    <script>
+        function getClients() {
+            const userDataContainer = document.getElementById('userDataContainer');
+            fetch('api/client/list')
+                .then(response => response.text())
+                .then(clients => userDataContainer.innerHTML = clients);
+        }
+
+
+    </script>
+</head>
+
+<body>
+
+<#list error as message>
+<ul>
+    <li><h3>${(message)!""}</h3></li>
+</ul>
+</#list>
+<h4>Добавить нового клиента</h4>
+<form action="/api/client" method="post">
+    <p><input type="text" id="name" name="name" placeholder="Введите имя клиента"></p>
+    <p><input type="text" id="address" name="address" placeholder="Введите адрес клиента"></p>
+    <p><input type="text" id="phone" name="phone" placeholder="Введите телефон клиента"></p>
+    <p><input type="submit" value="Добавить клиента"></p>
+</form>
+
+<h4>Получить всех клиентов</h4>
+<button onclick="getClients()">Получить</button>
+<pre id="userDataContainer"></pre>
+
+<h4>Список клиентов</h4>
+<table style="width: 700px">
+    <thead>
+    <tr>
+        <td style="width: 50px">Id</td>
+        <td style="width: 150px">Имя</td>
+        <td style="width: 250px">Адрес</td>
+        <td style="width: 250px">Телефон</td>
+    </tr>
+    </thead>
+    <tbody>
+    <#list clients as client>
+    <tr>
+        <td>${client.id}</td>
+        <td>${client.name}</td>
+        <td>${(client.address.getStreet())!"адрес не задан"}</td>
+        <td>${(client.getAllPhonesString())!"телефоны не заданы"}</td>
+    </tr>
+    </#list>
+    </tbody>
+</table>
+</body>
+</html>
