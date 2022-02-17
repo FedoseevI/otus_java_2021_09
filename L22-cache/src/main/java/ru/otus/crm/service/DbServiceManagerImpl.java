@@ -37,10 +37,12 @@ public class DbServiceManagerImpl implements DBServiceManager {
                 var managerNo = managerDataTemplate.insert(connection, manager);
                 var createdManager = new Manager(managerNo, manager.getLabel(), manager.getParam1());
                 log.info("created manager: {}", createdManager);
+                myCache.put(Long.toString(managerNo), manager);
                 return createdManager;
             }
             managerDataTemplate.update(connection, manager);
             log.info("updated manager: {}", manager);
+            myCache.put(Long.toString(manager.getNo()), manager);
             return manager;
         });
     }
@@ -56,9 +58,7 @@ public class DbServiceManagerImpl implements DBServiceManager {
         return transactionRunner.doInTransaction(connection -> {
             var managerOptional = managerDataTemplate.findById(connection, no);
             log.info("manager: {}", managerOptional);
-            if (managerOptional.isPresent()) {
-                myCache.put(Long.toString(no), managerOptional.get());
-            }
+            if (managerOptional.isPresent()) myCache.put(Long.toString(no), managerOptional.get());
             return managerOptional;
         });
     }

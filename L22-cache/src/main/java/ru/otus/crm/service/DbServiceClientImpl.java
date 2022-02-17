@@ -37,10 +37,12 @@ public class DbServiceClientImpl implements DBServiceClient {
                 var clientId = dataTemplate.insert(connection, client);
                 var createdClient = new Client(clientId, client.getName());
                 log.info("created client: {}", createdClient);
+                myCache.put(Long.toString(clientId), client);
                 return createdClient;
             }
             dataTemplate.update(connection, client);
             log.info("updated client: {}", client);
+            myCache.put(Long.toString(client.getId()), client);
             return client;
         });
     }
@@ -56,9 +58,8 @@ public class DbServiceClientImpl implements DBServiceClient {
         return transactionRunner.doInTransaction(connection -> {
             var clientOptional = dataTemplate.findById(connection, id);
             log.info("client: {}", clientOptional);
-            if (clientOptional.isPresent()) {
-                myCache.put(Long.toString(id), clientOptional.get());
-            }
+            if (clientOptional.isPresent()) myCache.put(Long.toString(id), clientOptional.get());
+
             return clientOptional;
         });
     }
