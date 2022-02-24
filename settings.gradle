@@ -27,5 +27,6 @@ include 'L24-webServer'
 include 'L25-di:class-demo'
 include 'L25-di:homework-template'
 
-include 'L31-executors'
+include 'L28-springDataJdbc'
 
+include 'L31-executors'
