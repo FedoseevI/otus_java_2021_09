@@ -7,8 +7,8 @@ import ru.otus.api.SensorDataProcessor;
 import ru.otus.api.model.SensorData;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 // Этот класс нужно реализовать
@@ -17,7 +17,8 @@ public class SensorDataProcessorBuffered implements SensorDataProcessor {
 
     private final int bufferSize;
     private final SensorDataBufferedWriter writer;
-    List<SensorData> dataBuffer = new CopyOnWriteArrayList<>();
+    private final ConcurrentLinkedQueue<SensorData> dataBuffer = new ConcurrentLinkedQueue<>();
+    private final ReentrantLock locker = new ReentrantLock();
 
     public SensorDataProcessorBuffered(int bufferSize, SensorDataBufferedWriter writer) {
         this.bufferSize = bufferSize;
@@ -27,23 +28,29 @@ public class SensorDataProcessorBuffered implements SensorDataProcessor {
     @Override
     public void process(SensorData data) {
         dataBuffer.add(data);
-        synchronized (writer) {
+        locker.lock();
+        try {
             if (dataBuffer.size() >= bufferSize) {
                 flush();
             }
+        } catch (Exception e) {
+            log.error("Ошибка в процессе обработки", e);
+        } finally {
+            locker.unlock();
         }
     }
 
     public void flush() {
-        synchronized (writer) {
-            try {
-                if (dataBuffer.size() > 0) {
-                    writer.writeBufferedData(dataBuffer.stream().sorted(Comparator.comparing(SensorData::getMeasurementTime)).collect(Collectors.toList()));
-                    dataBuffer.clear();
-                }
-            } catch (Exception e) {
-                log.error("Ошибка в процессе записи буфера", e);
+        locker.lock();
+        try {
+            if (dataBuffer.size() > 0) {
+                writer.writeBufferedData(dataBuffer.stream().sorted(Comparator.comparing(SensorData::getMeasurementTime)).collect(Collectors.toList()));
+                dataBuffer.clear();
             }
+        } catch (Exception e) {
+            log.error("Ошибка в процессе записи буфера", e);
+        } finally {
+            locker.unlock();
         }
     }
 
