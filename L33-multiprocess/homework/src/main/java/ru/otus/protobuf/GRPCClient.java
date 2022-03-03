@@ -10,6 +10,7 @@ import ru.otus.protobuf.generated.RemoteServiceGrpc;
 import ru.otus.protobuf.generated.ServerResponse;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GRPCClient {
 
@@ -20,6 +21,7 @@ public class GRPCClient {
     private static final long SERVER_START_NUMBER = 1;
     private static final long SERVER_END_NUMBER = 30;
     private static final long CLIENT_LOOP_COUNT = 50;
+    private static final ReentrantLock locker = new ReentrantLock();
 
     private static long lastNumber = 0;
 
@@ -41,8 +43,15 @@ public class GRPCClient {
         newStub.getNumbers(clientRequest, new StreamObserver<>() {
             @Override
             public void onNext(ServerResponse response) {
-                lastNumber = response.getCurrentNumber();
-                logger.info("new value = {}", lastNumber);
+                locker.lock();
+                try {
+                    lastNumber = response.getCurrentNumber();
+                    logger.info("new value = {}", lastNumber);
+                } catch (Exception e) {
+                    logger.error("Ошибка в процессе обработки", e);
+                } finally {
+                    locker.unlock();
+                }
             }
 
             @Override
@@ -57,16 +66,27 @@ public class GRPCClient {
             }
         });
 
+
         var currentValue = 0L;
+
         for (long i = 1; i <= CLIENT_LOOP_COUNT; i++) {
-            currentValue = currentValue + lastNumber + 1;
-            lastNumber = 0;
-            logger.info("currentValue: {}", currentValue);
+            locker.lock();
+            try {
+                currentValue = currentValue + lastNumber + 1;
+                lastNumber = 0;
+                logger.info("currentValue: {}", currentValue);
+            } catch (Exception e) {
+                logger.error("Ошибка в процессе обработки", e);
+            } finally {
+                locker.unlock();
+            }
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
+                logger.error("Ошибка в процессе обработки", e);
             }
         }
+
 
         latch.await();
 
