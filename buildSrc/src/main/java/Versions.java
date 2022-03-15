@@ -25,6 +25,7 @@ public interface Versions {
     String stomp = "2.3.4";
     String bootstrap = "5.1.3";
     String springDocOpenapiUi = "1.6.5";
+    String jquery = "1.5.7";
 
     String jsr305 = "3.0.2";
 
