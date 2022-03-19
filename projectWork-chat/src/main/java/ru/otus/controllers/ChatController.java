@@ -54,6 +54,7 @@ public class ChatController {
         message.setMessageSendTime(LocalDateTime.parse(jsonObject.getString("sendingTime"), formatter));
         messageService.saveMessage(message);
         this.messagingTemplate.convertAndSend("/topic/messageFor." + userTo.getUsername(), message);
+        this.messagingTemplate.convertAndSend("/topic/response." + username + "." + user, message);
         return message;
     }
 

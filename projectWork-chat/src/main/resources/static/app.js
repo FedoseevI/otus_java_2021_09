@@ -7,7 +7,6 @@ let connectingElement = document.querySelector('.connecting');
 
 let stompClient = null;
 let sub1 = null;
-let sub2 = null;
 let subNewUserMessage = null;
 let user = null;
 let username = null;
@@ -44,11 +43,9 @@ function onConnected() {
 
     if(sub1){
         sub1.unsubscribe();
-        sub2.unsubscribe();
     }
 
     sub1 = stompClient.subscribe('/topic/response.'+username+'.'+user, onMessageReceived);
-    sub2 = stompClient.subscribe('/topic/response.'+user+'.'+username, onMessageReceived);
 
     if(!subNewUserMessage){
         subNewUserMessage = stompClient.subscribe('/topic/messageFor.'+user, updateUsersNewMessages);
