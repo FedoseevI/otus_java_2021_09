@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>чат</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/app.css}" rel="stylesheet"/>
+</head>
+<body>
+<div id="chat-page" >
+    <div id="messagingArea" class="chat-container hidden">
+        <div class="connecting">Подключение</div>
+        <ul id="messageArea">
+        </ul>
+        <form id="messageForm" name="messageForm">
+            <div class="form-group">
+                <div class="input-group clearfix">
+                    <input type="text" id="message" placeholder="Введите сообщение..." autocomplete="off"
+                           class="form-control"/>
+                    <button type="submit" class="primary">Отправить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="users-container">
+        <div class="users-header">
+            <h2>Пользователи</h2>
+        </div>
+        <form onsubmit="connect(this)" th:each="userToChat: ${users}" th:id="${userToChat.getUsername()}" th:name="${'form_'+userToChat.getUsername()}">
+            <input type="hidden" id="username" name="username" th:value="${userToChat.getUsername()}"/>
+            <input type="hidden" id="user" name="user" th:value="${user}"/>
+            <div class="form-group">
+                <button name="userButton" th:id="${'userButton_'+userToChat.getUsername()}" th:text="${userToChat.getUsername()}" type="submit" class="accent username-submit"></button>
+            </div>
+        </form>
+    </div>
+</div>
+<script th:src="@{/app.js}"></script>
+<script th:src="@{/webjars/sockjs-client/sockjs.min.js}"></script>
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/stomp.min.js}"></script>
+</body>
+</html>
